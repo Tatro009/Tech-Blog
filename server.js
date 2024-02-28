@@ -2,6 +2,8 @@ const express = require('express');
 const session = require('express-session');
 const routes = require('./controllers');
 const sequelize = require('./config/connection');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,7 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Session middleware
-const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sess = {
   secret: process.env.SESSION_SECRET,
   cookie: {},
@@ -23,6 +24,11 @@ const sess = {
   }),
 };
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // trust first proxy
+  sess.cookie.secure = true; // serve secure cookies
+}
+
 app.use(session(sess));
 
 // Routes
@@ -32,3 +38,4 @@ app.use(routes);
 sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => console.log(`App listening on port ${PORT}!`));
 });
+
