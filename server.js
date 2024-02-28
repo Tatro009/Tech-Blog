@@ -1,6 +1,9 @@
 const express = require('express');
+const homeRoutes = require('./controllers/home-routes');
+const postRoutes = require('./controllers/api/post-routes');
+const commentRoutes = require('./controllers/api/comment-routes');
+const userRoutes = require('./controllers/user-routes');
 const session = require('express-session');
-const routes = require('./controllers');
 const sequelize = require('./config/connection');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 require('dotenv').config();
@@ -32,7 +35,10 @@ if (process.env.NODE_ENV === 'production') {
 app.use(session(sess));
 
 // Routes
-app.use(routes);
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/home', homeRoutes);
 
 // Sync database and start server
 sequelize.sync({ force: false }).then(() => {
